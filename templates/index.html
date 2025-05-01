@@ -137,13 +137,15 @@
     {% endif %}
 
     <form method="POST" action="/sort">
-        {% for lang in languages %}
-            <button class="btn" name="language" value="{{ lang }}">{{ lang }}</button>
-        {% endfor %}
-    </form>
+    {% for lang in languages %}
+        <button class="btn" name="language" value="{{ lang }}">{{ lang }}</button>
+    {% endfor %}
+    <button class="btn" onclick="document.getElementById('popup').style.display='block'">Add Language</button>
+    <button class="btn" name="language" value="__SKIP__">Skip</button>
+</form>
+
 
     <br>
-    <button class="btn" onclick="document.getElementById('popup').style.display='block'">+ Add Language</button>
 
     <div id="popup">
         <form action="/add_language" method="POST">
