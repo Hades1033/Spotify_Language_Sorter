@@ -2,7 +2,7 @@ import os
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 from flask import Flask, render_template, redirect, request, session, url_for
-from flask_session import Session
+# from flask_session import Session
 import config  # Import the config file
 
 # Initialize Flask app and session management
@@ -10,7 +10,7 @@ app = Flask(__name__)
 app.secret_key = os.urandom(24)
 app.config['SESSION_COOKIE_NAME'] = 'spotify_session'
 app.config['SESSION_TYPE'] = 'filesystem'
-Session(app)
+# Session(app)
 
 # Spotify API credentials
 CLIENT_ID = config.CLIENT_ID
@@ -95,7 +95,7 @@ def callback():
 
     return redirect(url_for('sort'))
 
-@app.route('/sort', methods=['GET', 'POST'])
+@app.route('/sort', methods=['GET', 'POST', 'SKIP'])
 def sort():
     token_info = session.get('token_info', None)
     if not token_info:
@@ -106,14 +106,16 @@ def sort():
     if request.method == 'POST':
         lang = request.form.get('language')
         song = songs_to_sort.pop(0)  # Get and remove the first song from the list
-        playlists[lang].append(song)
 
-        # Add the song to the corresponding Spotify playlist
-        sp.playlist_add_items(playlist_id=playlist_ids[lang], items=[song['id']])
+        if lang != '__SKIP__':
+            playlists[lang].append(song)
+            # Add the song to the corresponding Spotify playlist
+            sp.playlist_add_items(playlist_id=playlist_ids[lang], items=[song['id']])
 
         # If there are no more songs to sort, redirect to the done page
         if not songs_to_sort:
             return redirect(url_for('done'))
+
     if songs_to_sort:
         current_song = songs_to_sort[0]
         return render_template('index.html', song=current_song, languages=list(playlists.keys()))
@@ -165,5 +167,5 @@ def create_playlists():
 
     return render_template("success.html", links=created_links)
 
-# if __name__ == '__main__':
-#     app.run(debug=True)
+if __name__ == '__main__':
+    app.run(debug=True)
