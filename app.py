@@ -2,7 +2,8 @@ import os
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 from flask import Flask, render_template, redirect, request, session, url_for
-# from flask_session import Session
+import random
+
 import config  # Import the config file
 
 # Initialize Flask app and session management
@@ -27,7 +28,7 @@ playlist_ids = {}
 songs_to_sort = []
 
 # Initial languages for playlist creation
-initial_languages = ['Hindi', 'English']
+# initial_languages = ['Hindi', 'English']
 
 @app.route('/')
 def index():
@@ -40,17 +41,21 @@ def login():
 
 
 def get_playlists(sp):
-    playlists = []
     results = sp.current_user_playlists(limit=50)
     while results:
         for item in results['items']:
-            if item['name'] in initial_languages:
-                playlists.append({
-                    'name': item['name'],
-                    'id': item['id'],
-                    'owner': item['owner']['display_name'],
-                    'tracks': item['tracks']['total']
-                })
+            if len(item['name']) == 0:
+                continue
+            # print(item['name'], len(item['name']), type(item['name']))
+            if item['name'][-1] == ' ':
+                # playlists.append({
+                #     'name': item['name'],
+                #     'id': item['id'],
+                #     'owner': item['owner']['display_name'],
+                #     'tracks': item['tracks']['total']
+                # })
+                print(item['name'])
+                playlists[item['name']] = item['id']
         if results['next']:
             results = sp.next(results)
         else:
@@ -67,7 +72,7 @@ def callback():
     user_id = sp.me()['id']
 
     # Create playlists for initial languages if they don't exist
-    existing_playlists = get_playlists(sp)
+    get_playlists(sp)
     saved_tracks = sp.current_user_saved_tracks(limit=50)
     while saved_tracks:
         for item in saved_tracks['items']:
@@ -78,21 +83,27 @@ def callback():
             break
 
 
-    for lang in initial_languages:
-        matching = next((p for p in existing_playlists if p['name'] == f"{lang}"), None)
-        if matching:
-            playlist_ids[lang] = matching['id']
-            songs_to_subtract = sp.playlist_tracks(matching['id'])
-            playlists[lang] = songs_to_subtract['items']
-            for song in songs_to_subtract['items']:
-                track_ids_to_remove = {item['track']['id'] for item in songs_to_subtract['items']}
-                songs_to_sort[:] = [song for song in songs_to_sort if song['id'] not in track_ids_to_remove]
+    # for lang in initial_languages:
+    #     matching = next((p for p in playlists if p['name'] == f"{lang}"), None)
+    #     if matching:
+    #         playlist_ids[lang] = matching['id']
+    #         songs_to_subtract = sp.playlist_tracks(matching['id'])
+    #         playlists[lang] = songs_to_subtract['items']
+    #         for song in songs_to_subtract['items']:
+    #             track_ids_to_remove = {item['track']['id'] for item in songs_to_subtract['items']}
+    #             songs_to_sort[:] = [song for song in songs_to_sort if song['id'] not in track_ids_to_remove]
 
-        else:
-            new_playlist = sp.user_playlist_create(user=user_id, name=f"{lang}", public=False)
-            playlist_ids[lang] = new_playlist['id']
-            playlists[lang] = []
+    #     else:
+    #         new_playlist = sp.user_playlist_create(user=user_id, name=f"{lang}", public=False)
+    #         # playlist_ids[lang] = new_playlist['id']
+    #         playlists[lang] = new_playlist['id']
 
+    for lang in playlists.keys():
+        songs_to_subtract = sp.playlist_tracks(playlists[lang])
+        track_ids_to_remove = {item['track']['id'] for item in songs_to_subtract['items']}
+        songs_to_sort[:] = [song for song in songs_to_sort if song['id'] not in track_ids_to_remove]
+
+    random.shuffle(songs_to_sort)
     return redirect(url_for('sort'))
 
 @app.route('/sort', methods=['GET', 'POST', 'SKIP'])
@@ -108,9 +119,8 @@ def sort():
         song = songs_to_sort.pop(0)  # Get and remove the first song from the list
 
         if lang != '__SKIP__':
-            playlists[lang].append(song)
             # Add the song to the corresponding Spotify playlist
-            sp.playlist_add_items(playlist_id=playlist_ids[lang], items=[song['id']])
+            sp.playlist_add_items(playlist_id=playlists[lang], items=[song['id']])
 
         # If there are no more songs to sort, redirect to the done page
         if not songs_to_sort:
@@ -137,35 +147,12 @@ def add_language():
     user_id = sp.me()['id']
 
     # Avoid duplicates
-    if new_lang not in playlists:
-        new_playlist = sp.user_playlist_create(user=user_id, name=f"{new_lang}", public=False)
-        playlists[new_lang] = []
-        playlist_ids[new_lang] = new_playlist['id']
+    if new_lang not in playlists.keys():
+        new_playlist = sp.user_playlist_create(user=user_id, name=f"{new_lang} ", public=False)
+        playlists[new_lang] = new_playlist['id']
 
     return redirect(url_for('sort'))
 
-@app.route('/create_playlists')
-def create_playlists():
-    token_info = session.get('token_info', None)
-    if not token_info:
-        return redirect(url_for('login'))
-
-    sp = spotipy.Spotify(auth=token_info['access_token'])
-    user_id = sp.me()['id']
-
-    created_links = {}
-
-    # Create playlists for new languages
-    for lang, songlist in playlists.items():
-        if not songlist:
-            continue
-
-        track_ids = [song['id'] for song in songlist]
-        playlist = sp.user_playlist_create(user=user_id, name=f"{lang} Playlist", public=False)
-        sp.playlist_add_items(playlist_id=playlist['id'], items=track_ids)
-        created_links[lang] = playlist['external_urls']['spotify']
-
-    return render_template("success.html", links=created_links)
 
 if __name__ == '__main__':
     app.run(debug=True)
