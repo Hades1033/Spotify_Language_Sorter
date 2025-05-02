@@ -152,7 +152,3 @@ def add_language():
         playlists[new_lang] = new_playlist['id']
 
     return redirect(url_for('sort'))
-
-
-if __name__ == '__main__':
-    app.run(debug=True)
