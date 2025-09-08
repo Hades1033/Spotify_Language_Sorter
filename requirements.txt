@@ -1,4 +1,5 @@
 Flask
 spotipy
 flask_session
+dotenv
 gunicorn
