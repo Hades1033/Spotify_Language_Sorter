@@ -29,15 +29,16 @@ sp_oauth = SpotifyOAuth(
 # Globals
 playlists = {}       # {lang: playlist_id}
 songs_to_sort = []   # for Language Sorter
-
+# user_name = None
 
 # -------------------
 # Auth
 # -------------------
 @app.route('/')
 def home():
-    token_info = session.get('token_info')
+    global user_name
     user_name = None
+    token_info = session.get('token_info')
     if token_info:
         try:
             sp = spotipy.Spotify(auth=token_info['access_token'])
@@ -134,14 +135,14 @@ def sort():
 
     if songs_to_sort:
         current_song = songs_to_sort[0]
-        return render_template('index.html', song=current_song, languages=list(playlists.keys()))
+        return render_template('sorter.html', song=current_song, languages=list(playlists.keys()), user_name=user_name)
     else:
         return redirect(url_for('done'))
 
 
 @app.route('/done')
 def done():
-    return render_template('done.html', playlists=playlists)
+    return render_template('done.html', playlists=playlists, user_name=user_name)
 
 
 @app.route('/add_language', methods=['POST'])
@@ -280,9 +281,9 @@ def random_shuffler():
                 playlists_created.append(playlist)
                 add_songs_to_playlist(sp, playlist['id'], leftover_songs)
 
-        return render_template("shuffler_done.html")
+        return render_template("shuffler_done.html", user_name=user_name)
 
-    return render_template("shuffler.html")
+    return render_template("shuffler.html", user_name=user_name)
 
 
 if __name__ == '__main__':

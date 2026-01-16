@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -46,4 +46,55 @@
         </ul>
     {% endfor %}
 </body>
-</html>
+</html> -->
+
+
+{% extends 'base.html' %}
+
+{% block title %}Done{% endblock %}
+
+{% block style %}
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #121212;
+            color: white;
+            font-family: 'Montserrat', sans-serif;
+            padding: 40px;
+            text-align: center;
+        }
+        h1 {
+            color: #1DB954;
+            margin-bottom: 40px;
+        }
+        h2 {
+            color: #ffffff;
+            margin-top: 30px;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0 auto;
+            max-width: 600px;
+        }
+        li {
+            background-color: #282828;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 5px 0;
+            font-size: 16px;
+        }
+    </style>
+{ %endblock %}
+
+{% block content %}
+<h1>All Songs Sorted!</h1>
+    {% for lang, songlist in playlists.items() %}
+        <h2>{{ lang }}</h2>
+        <ul>
+            {% for song in songlist %}
+                <li>{{ song.title }} by {{ song.artist }}</li>
+            {% endfor %}
+        </ul>
+    {% endfor %}
+{% endblock %}

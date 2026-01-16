@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html>
 <head>
     <title>Shuffling Done</title>
@@ -10,4 +10,19 @@
     <h1>Playlists Created!</h1>
     <a href="{{ url_for('home') }}">Back to Home</a>
 </body>
-</html>
+</html> -->
+
+{% extends 'base.html' %}
+
+{% block title %}Shuffling Done{% endblock %}
+
+{% block style %}
+<style>
+        body { background:#191414; color:#fff; font-family:Arial; text-align:center; }
+    </style>
+{% endblock %}
+
+{% block content %}
+<h1>Playlists Created!</h1>
+    <a href="{{ url_for('home') }}">Back to Home</a>
+{% endblock %}

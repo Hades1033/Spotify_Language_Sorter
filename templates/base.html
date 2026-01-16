@@ -1,17 +1,18 @@
-<!-- <!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
-    <title>Spotify Tools</title>
+    <title>{% block title %}{% endblock %}</title>
     <style>
-        body { background-color: #191414; color: #fff; font-family: Arial, sans-serif; }
         header { display: flex; justify-content: space-between; align-items: center; padding: 20px; background: #1DB954; }
         nav a { margin-right: 20px; text-decoration: none; color: #fff; font-weight: bold; }
         .right { margin-left: auto; }
     </style>
+    {% block style %}{% endblock %}
 </head>
 <body>
     <header>
         <nav>
+            <a href="{{ url_for('home') }}">Home</a>
             <a href="{{ url_for('language_sorter') }}">Language Sorter</a>
             <a href="{{ url_for('random_shuffler') }}">Random Shuffler</a>
         </nav>
@@ -24,24 +25,6 @@
         </div>
     </header>
 
-    
+    {% block content %} {% endblock %}
 </body>
-</html> -->
-
-
-{% extends 'base.html' %}
-
-{% block title %}Home{% endblock %}
-
-{% block style %}
-<style>
-        body { background-color: #191414; color: #fff; font-family: Arial, sans-serif; }
-    </style>
-{% endblock %}
-
-{% block content %}
-<div style="padding: 40px; text-align: center;">
-        <h1>Spotify Playlist Tools</h1>
-        <p>Select a feature from above to get started.</p>
-    </div>
-{% endblock %}
+</html>
