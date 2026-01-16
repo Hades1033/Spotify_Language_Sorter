@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Random Shuffler</title>
+    <style>
+        body { background:#191414; color:#fff; font-family:Arial; text-align:center; }
+        label { display:block; margin:15px 0; }
+    </style>
+</head>
+<body>
+    <h1>Random Shuffler</h1>
+    <form method="POST">
+        <label>
+            <input type="radio" name="mode" value="num_playlists" required>
+            Number of playlists
+        </label>
+        <label>
+            <input type="radio" name="mode" value="songs_per_playlist">
+            Songs per playlist
+        </label>
+        <input type="number" name="value" min="1" required placeholder="Enter number">
+
+        <h3>What to do with extra songs?</h3>
+        <label>
+            <input type="radio" name="leftover_action" value="distribute" required>
+            Distribute randomly
+        </label>
+        <label>
+            <input type="radio" name="leftover_action" value="new_playlist">
+            Create new playlist
+        </label>
+
+        <br><br>
+        <button type="submit">Shuffle Now</button>
+    </form>
+</body>
+</html>

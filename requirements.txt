@@ -1,0 +1,6 @@
+Flask
+spotipy
+dotenv
+gunicorn
+python-dotenv
+flask_session
